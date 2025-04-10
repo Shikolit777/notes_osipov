@@ -23,6 +23,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    public List<notes> list_notes = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,23 +35,40 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Load existing notes when activity starts
+        onLoad();
     }
-    public void OpenNote(View view)
-    {
+
+    public void OnAddNote(View view) {
+        int IdNoteEdit = -1;
+
+        if (view.getTag() != null) {
+            IdNoteEdit = (int) view.getTag();
+        }
+
+        setContentView(R.layout.activity_note);
+
+        if (IdNoteEdit != -1 && IdNoteEdit < list_notes.size()) {
+            EditText etName = findViewById(R.id.editTextTextPersonName);
+            MultiAutoCompleteTextView etText = findViewById(R.id.multiAutoCompleteTextView);
+
+            etName.setText(list_notes.get(IdNoteEdit).name);
+            etText.setText(list_notes.get(IdNoteEdit).text);
+        }
+    }
+
+    public void OpenNote(View view) {
         setContentView(R.layout.activity_note);
     }
 
-    public class notes
-    {
+    public static class notes {
         public String name;
         public String text;
         public String date;
     }
 
-    public List<notes> list_notes = new ArrayList<>();
-
-    public void AddNote(View view)
-    {
+    public void AddNote(View view) {
         notes new_notes = new notes();
 
         EditText e_name = findViewById(R.id.editTextTextPersonName);
@@ -63,22 +82,23 @@ public class MainActivity extends AppCompatActivity {
         new_notes.date = formatForDateNow.format(dateNow);
 
         list_notes.add(new_notes);
-        setContentView(R.layout.activity_note);
+
+        // Return to main activity and reload notes
+        setContentView(R.layout.activity_main);
         onLoad();
     }
 
-    public void onLoad()
-    {
+    public void onLoad() {
         LinearLayout parrent = findViewById(R.id.parrent);
+        // Clear existing views to avoid duplicates
+        parrent.removeAllViews();
 
-        System.out.print(list_notes.size());
-        for (int i = 0; i < list_notes.size(); i++)
-        {
+        for (int i = 0; i < list_notes.size(); i++) {
             LinearLayout ll = new LinearLayout(this);
             ll.setOrientation(LinearLayout.HORIZONTAL);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
-                    RelativeLayout.LayoutParams.MATCH_PARENT
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
             );
             ll.setLayoutParams(params);
             ll.setTag(i);
@@ -117,15 +137,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void OpenNotes(View view)
-    {
+    public void OpenNotes(View view) {
         int id = (int) view.getTag();
-        setContentView(R.layout.activity_note);
+        if (id >= 0 && id < list_notes.size()) {
+            setContentView(R.layout.activity_note);
 
-        EditText e_name = findViewById(R.id.editTextTextPersonName);
-        e_name.setText(list_notes.get(id).name);
+            EditText e_name = findViewById(R.id.editTextTextPersonName);
+            e_name.setText(list_notes.get(id).name);
 
-        MultiAutoCompleteTextView e_text = findViewById(R.id.multiAutoCompleteTextView);
-        e_text.setText(list_notes.get(id).text);
+            MultiAutoCompleteTextView e_text = findViewById(R.id.multiAutoCompleteTextView);
+            e_text.setText(list_notes.get(id).text);
+        }
     }
 }
